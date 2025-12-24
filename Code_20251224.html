@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>面包店收银管理系统（带导出和日期筛选）</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      background: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    header {
+      background: #8b5a2b;
+      color: #fff;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-tabs {
+      display: flex;
+      list-style: none;
+    }
+    .nav-tabs li {
+      margin: 0;
+    }
+    .nav-tabs button {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #555;
+      transition: all 0.2s;
+    }
+    .nav-tabs button:hover {
+      color: #8b5a2b;
+      background: #faf6f0;
+    }
+    .nav-tabs button.active {
+      color: #8b5a2b;
+      border-bottom: 3px solid #8b5a2b;
+    }
+    .tab-content {
+      padding: 2rem 0;
+    }
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #8b5a2b;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin: 1.5rem 0 0.75rem;
+      color: #444;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    input[type="date"] {
+      line-height: 1;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #8b5a2b;
+    }
+    button {
+      background: #8b5a2b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #6d4520;
+    }
+    button.secondary {
+      background: #e9ecef;
+      color: #333;
+    }
+    button.secondary:hover {
+      background: #dee2e6;
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+    .table-responsive {
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+    tr:hover {
+      background: #faf6f0;
+    }
+    .text-right {
+      text-align: right;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .success {
+      color: #28a745;
+    }
+    .danger {
+      color: #dc3545;
+    }
+    .warning {
+      color: #ffc107;
+    }
+    .info {
+      color: #17a2b8;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .badge-primary {
+      background: #8b5a2b;
+      color: #fff;
+    }
+    .badge-success {
+      background: #28a745;
+      color: #fff;
+    }
+    .badge-warning {
+      background: #ffc107;
+      color: #333;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .summary-box {
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      border-left: 3px solid #8b5a2b;
+    }
+    .summary-box h4 {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+    .summary-box .value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #8b5a2b;
+    }
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .flex-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+    .mt-1 {
+      margin-top: 0.5rem;
+    }
+    .mt-2 {
+      margin-top: 1rem;
+    }
+    .mb-2 {
+      margin-bottom: 1rem;
+    }
+    .small {
+      font-size: 0.875rem;
+      color: #666;
+    }
+    .text-muted {
+      color: #6c757d;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>面包店收银管理系统</h1>
+      <div class="subtitle">销售记录、会员管理与充值活动（支持日期筛选 & Excel导出）</div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="container">
+      <ul class="nav-tabs">
+        <li><button class="tab-btn active" data-tab="dashboard">概览</button></li>
+        <li><button class="tab-btn" data-tab="products">面包商品管理</button></li>
+        <li><button class="tab-btn" data-tab="sales">销售记录</button></li>
+        <li><button class="tab-btn" data-tab="members">会员管理</button></li>
+        <li><button class="tab-btn" data-tab="recharge">充值活动管理</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container tab-content">
+    <!-- 概览页 -->
+    <div id="dashboard" class="tab-pane active">
+      <div class="card">
+        <h2>今日销售概览</h2>
+        <div class="grid">
+          <div class="summary-box">
+            <h4>今日营业额</h4>
+            <div class="value" id="todayRevenue">¥0.00</div>
+          </div>
+          <div class="summary-box">
+            <h4>今日利润</h4>
+            <div class="value" id="todayProfit">¥0.00</div>
+          </div>
+          <div class="summary-box">
+            <h4>今日毛利率</h4>
+            <div class="value" id="todayMarginRate">0%</div>
+          </div>
+          <div class="summary-box">
+            <h4>会员总数</h4>
+            <div class="value" id="memberCount">0</div>
+          </div>
+          <div class="summary-box">
+            <h4>会员余额合计</h4>
+            <div class="value" id="memberBalanceTotal">¥0.00</div>
+          </div>
+          <div class="summary-box">
+            <h4>今日销售单量</h4>
+            <div class="value" id="todaySalesCount">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-2">
+        <div class="flex-between mb-2">
+          <h2>今日热销面包</h2>
+          <button id="exportDashboardExcel" class="secondary">导出热销数据 Excel</button>
+        </div>
+        <div class="table-responsive">
+          <table id="topProductsTable">
+            <thead>
+              <tr>
+                <th>面包名称</th>
+                <th>销量</th>
+                <th>销售额</th>
+                <th>利润</th>
+                <th>毛利率</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="text-center">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 面包商品管理 -->
+    <div id="products" class="tab-pane">
+      <div class="card">
+        <h2>面包商品管理</h2>
+        <div class="flex-between mb-2">
+          <div>
+            <h3>添加新面包</h3>
+            <div class="small text-muted">录入单价和成本价，系统自动计算毛利率</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="productName">面包名称</label>
+          <input type="text" id="productName" placeholder="例如：全麦吐司">
+        </div>
+        <div class="grid">
+          <div class="form-group">
+            <label for="productPrice">售价（元）</label>
+            <input type="number" step="0.01" min="0" id="productPrice" placeholder="8.00">
+          </div>
+          <div class="form-group">
+            <label for="productCost">成本（元）</label>
+            <input type="number" step="0.01" min="0" id="productCost" placeholder="3.50">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="productUnit">单位</label>
+          <input type="text" id="productUnit" placeholder="个/袋/份" value="个">
+        </div>
+        <button id="addProductBtn">添加面包</button>
+      </div>
+
+      <div class="card mt-2">
+        <div class="flex-between mb-2">
+          <h2>面包列表</h2>
+          <button id="exportProductsExcel" class="secondary">导出商品 Excel</button>
+        </div>
+        <div class="table-responsive">
+          <table id="productsTable">
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>单位</th>
+                <th>售价</th>
+                <th>成本</th>
+                <th>毛利</th>
+                <th>毛利率</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="7" class="text-center">暂无数据，请先添加面包</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 销售记录（带日期筛选） -->
+    <div id="sales" class="tab-pane">
+      <div class="card">
+        <h2>今日销售登记</h2>
+        <div class="form-group">
+          <label for="saleProduct">选择面包</label>
+          <select id="saleProduct">
+            <option value="">-- 请先添加面包商品 --</option>
+          </select>
+        </div>
+        <div class="grid">
+          <div class="form-group">
+            <label for="saleQuantity">数量</label>
+            <input type="number" min="1" value="1" id="saleQuantity">
+          </div>
+          <div class="form-group">
+            <label for="saleMember">会员（选填）</label>
+            <select id="saleMember">
+              <option value="">非会员</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>商品信息</label>
+          <div id="saleProductInfo" class="small text-muted">请先选择面包</div>
+        </div>
+        <div class="form-group">
+          <label>应收金额</label>
+          <div id="saleTotalAmount" class="value">¥0.00</div>
+        </div>
+        <button id="addSaleBtn">确认销售</button>
+      </div>
+
+      <div class="card mt-2">
+        <div class="flex-wrap mb-2">
+          <h2>销售记录查询</h2>
+          <div class="form-group" style="width: 200px;">
+            <label for="saleDateFrom">开始日期</label>
+            <input type="date" id="saleDateFrom" value="">
+          </div>
+          <div class="form-group" style="width: 200px;">
+            <label for="saleDateTo">结束日期</label>
+            <input type="date" id="saleDateTo" value="">
+          </div>
+          <div style="align-self: flex-end; margin-bottom: 0.5rem;">
+            <button id="filterSalesBtn" class="secondary">查询</button>
+            <button id="resetSalesFilterBtn" class="secondary">重置</button>
+            <button id="exportSalesExcel" class="secondary">导出 Excel</button>
+          </div>
+        </div>
+        <div class="small text-muted mb-2">当前显示：<span id="salesDateRangeText">今日</span></div>
+        <div class="table-responsive">
+          <table id="salesTable">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>面包名称</th>
+                <th>数量</th>
+                <th>单价</th>
+                <th>成本</th>
+                <th>销售额</th>
+                <th>利润</th>
+                <th>会员</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="8" class="text-center">暂无销售记录</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-1">
+          <div>
+            筛选结果统计：
+            销售额：<span id="filterRevenue">¥0.00</span>，
+            成本：<span id="filterCost">¥0.00</span>，
+            利润：<span id="filterProfit">¥0.00</span>，
+            毛利率：<span id="filterMarginRate">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 会员管理 -->
+    <div id="members" class="tab-pane">
+      <div class="card">
+        <h2>添加会员</h2>
+        <div class="form-group">
+          <label for="memberName">会员姓名</label>
+          <input type="text" id="memberName" placeholder="张三">
+        </div>
+        <div class="form-group">
+          <label for="memberPhone">手机号码</label>
+          <input type="tel" id="memberPhone" placeholder="13800138000">
+        </div>
+        <button id="addMemberBtn">添加会员</button>
+      </div>
+
+      <div class="card mt-2">
+        <div class="flex-between mb-2">
+          <h2>会员列表</h2>
+          <button id="exportMembersExcel" class="secondary">导出会员 Excel</button>
+        </div>
+        <div class="table-responsive">
+          <table id="membersTable">
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>手机号</th>
+                <th>余额（元）</th>
+                <th>注册时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="text-center">暂无会员</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card mt-2" id="memberDetailCard" style="display: none;">
+        <div class="flex-between">
+          <div>
+            <h2>会员详情</h2>
+            <div id="memberDetailName" class="small"></div>
+          </div>
+          <button class="secondary" id="closeMemberDetail">关闭</button>
+        </div>
+
+        <div class="grid mt-2">
+          <div class="summary-box">
+            <h4>当前余额</h4>
+            <div class="value" id="memberBalance">¥0.00</div>
+          </div>
+          <div class="summary-box">
+            <h4>累计充值</h4>
+            <div class="value" id="memberRechargeTotal">¥0.00</div>
+          </div>
+          <div class="summary-box">
+            <h4>累计消费</h4>
+            <div class="value" id="memberConsumeTotal">¥0.00</div>
+          </div>
+        </div>
+
+        <h3>充值 / 扣费</h3>
+        <div class="grid">
+          <div class="form-group">
+            <label for="memberActionType">操作类型</label>
+            <select id="memberActionType">
+              <option value="recharge">充值</option>
+              <option value="consume">扣费（消费）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="memberAmount">金额（元）</label>
+            <input type="number" step="0.01" min="0" id="memberAmount" placeholder="100">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="memberRemark">备注</label>
+          <input type="text" id="memberRemark" placeholder="例如：生日赠送 / 面包消费">
+        </div>
+        <button id="saveMemberAction">确认操作</button>
+
+        <h3 class="mt-2">流水记录</h3>
+        <div class="flex-between mb-1">
+          <div></div>
+          <button id="exportMemberTransExcel" class="secondary" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;">导出流水 Excel</button>
+        </div>
+        <div class="table-responsive">
+          <table id="memberTransactionsTable">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>类型</th>
+                <th>金额</th>
+                <th>余额</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="text-center">暂无流水记录</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 充值活动管理 -->
+    <div id="recharge" class="tab-pane">
+      <div class="card">
+        <h2>充值活动管理</h2>
+        <div class="small text-muted mb-2">设置阶梯充值规则，例如：充100送10，充300送50</div>
+
+        <h3>添加阶梯充值活动</h3>
+        <div class="grid">
+          <div class="form-group">
+            <label for="rechargeMin">充值金额 ≥（元）</label>
+            <input type="number" min="0" step="0.01" id="rechargeMin" placeholder="100">
+          </div>
+          <div class="form-group">
+            <label for="rechargeGive">赠送金额（元）</label>
+            <input type="number" min="0" step="0.01" id="rechargeGive" placeholder="10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="rechargeDesc">活动说明（选填）</label>
+          <input type="text" id="rechargeDesc" placeholder="例如：开业活动 / 节日活动">
+        </div>
+        <button id="addRechargeRuleBtn">添加规则</button>
+      </div>
+
+      <div class="card mt-2">
+        <div class="flex-between mb-2">
+          <h2>当前充值活动列表</h2>
+          <button id="exportRechargeExcel" class="secondary">导出活动 Excel</button>
+        </div>
+        <div class="small text-muted mb-2">系统会自动匹配满足条件的最高阶梯</div>
+        <div class="table-responsive">
+          <table id="rechargeRulesTable">
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>充值金额 ≥</th>
+                <th>赠送金额</th>
+                <th>活动说明</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="text-center">暂无充值活动</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入SheetJS库用于导出Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // 工具函数
+    const $ = (el) => document.querySelector(el);
+    const $$ = (el) => document.querySelectorAll(el);
+    const formatDate = (d) => d.toLocaleDateString('zh-CN');
+    const formatDateTime = (d) => d.toLocaleString('zh-CN');
+    const formatMoney = (n) => '¥' + Number(n).toFixed(2);
+    const getTodayStr = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    // 数据结构 & localStorage 持久化
+    const db = {
+      products: [],          // { id, name, price, cost, unit, createdAt }
+      sales: [],             // { id, productId, quantity, memberId, amount, costTotal, profit, createdAt, date }
+      members: [],           // { id, name, phone, createdAt, balance, transactions: [] }
+      rechargeRules: []      // { id, minAmount, giveAmount, desc, createdAt }
+    };
+
+    // 加载数据
+    const loadData = () => {
+      const keys = Object.keys(db);
+      keys.forEach(key => {
+        const data = localStorage.getItem(`bakery_${key}`);
+        if (data) {
+          try {
+            db[key] = JSON.parse(data);
+          } catch (e) {
+            console.error('load data error', key, e);
+          }
+        }
+      });
+    };
+
+    // 保存数据
+    const saveData = (key) => {
+      if (key) {
+        localStorage.setItem(`bakery_${key}`, JSON.stringify(db[key]));
+      } else {
+        Object.keys(db).forEach(k => {
+          localStorage.setItem(`bakery_${k}`, JSON.stringify(db[k]));
+        });
+      }
+    };
+
+    // 生成唯一ID
+    const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+
+    // 页面切换
+    $$('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        $$('.tab-btn').forEach(b => b.classList.remove('active'));
+        $$('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        $(`#${tab}`).classList.add('active');
+        if (tab === 'dashboard') renderDashboard();
+        if (tab === 'products') renderProductsTable();
+        if (tab === 'sales') {
+          renderProductsSelect();
+          renderMembersSelect();
+          renderSalesTable();
+        }
+        if (tab === 'members') renderMembersTable();
+        if (tab === 'recharge') renderRechargeRulesTable();
+      });
+    });
+
+    // 面包商品管理
+    const renderProductsTable = () => {
+      const tbody = $('#productsTable tbody');
+      if (!db.products.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">暂无数据，请先添加面包</td></tr>';
+        return;
+      }
+      tbody.innerHTML = db.products.map(p => {
+        const profit = (p.price - p.cost).toFixed(2);
+        const rate = p.cost > 0 ? ((p.price - p.cost) / p.price * 100).toFixed(1) : 100;
+        return `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.unit}</td>
+            <td>${formatMoney(p.price)}</td>
+            <td>${formatMoney(p.cost)}</td>
+            <td>${formatMoney(profit)}</td>
+            <td>${rate}%</td>
+            <td>
+              <button class="secondary small-btn" data-id="${p.id}" onclick="editProduct('${p.id}')">编辑</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    const addProduct = () => {
+      const name = $('#productName').value.trim();
+      const price = parseFloat($('#productPrice').value) || 0;
+      const cost = parseFloat($('#productCost').value) || 0;
+      const unit = $('#productUnit').value.trim() || '个';
+      if (!name) return alert('请输入面包名称');
+      if (price <= 0) return alert('售价必须大于0');
+
+      db.products.push({
+        id: genId(),
+        name,
+        price,
+        cost,
+        unit,
+        createdAt: new Date().toISOString()
+      });
+      saveData('products');
+      renderProductsTable();
+      renderProductsSelect();
+      $('#productName').value = '';
+      $('#productPrice').value = '';
+      $('#productCost').value = '';
+      $('#productUnit').value = '个';
+    };
+
+    window.editProduct = (id) => {
+      const p = db.products.find(x => x.id === id);
+      if (!p) return;
+      $('#productName').value = p.name;
+      $('#productPrice').value = p.price;
+      $('#productCost').value = p.cost;
+      $('#productUnit').value = p.unit;
+      $('#addProductBtn').innerText = '保存修改';
+      $('#addProductBtn').onclick = () => {
+        p.name = $('#productName').value.trim();
+        p.price = parseFloat($('#productPrice').value) || 0;
+        p.cost = parseFloat($('#productCost').value) || 0;
+        p.unit = $('#productUnit').value.trim() || '个';
+        if (!p.name) return alert('请输入面包名称');
+        if (p.price <= 0) return alert('售价必须大于0');
+        saveData('products');
+        renderProductsTable();
+        renderProductsSelect();
+        $('#addProductBtn').innerText = '添加面包';
+        $('#addProductBtn').onclick = addProduct;
+        $('#productName').value = '';
+        $('#productPrice').value = '';
+        $('#productCost').value = '';
+        $('#productUnit').value = '个';
+      };
+    };
+
+    $('#addProductBtn').addEventListener('click', addProduct);
+
+    // 销售记录
+    const renderProductsSelect = () => {
+      const sel = $('#saleProduct');
+      if (!db.products.length) {
+        sel.innerHTML = '<option value="">-- 请先添加面包商品 --</option>';
+        $('#saleProductInfo').textContent = '请先添加面包';
+        $('#saleTotalAmount').textContent = '¥0.00';
+        return;
+      }
+      sel.innerHTML = db.products.map(p => `
+        <option value="${p.id}" data-price="${p.price}" data-cost="${p.cost}" data-name="${p.name}">
+          ${p.name} - ${formatMoney(p.price)}/${p.unit}
+        </option>
+      `).join('');
+      sel.dispatchEvent(new Event('change'));
+    };
+
+    const renderMembersSelect = () => {
+      const sel = $('#saleMember');
+      const options = ['<option value="">非会员</option>'];
+      if (db.members.length) {
+        options.push(
+          db.members.map(m => `
+            <option value="${m.id}">${m.name} (${m.phone}) 余额: ${formatMoney(m.balance || 0)}</option>
+          `).join('')
+        );
+      }
+      sel.innerHTML = options.join('');
+    };
+
+    const updateSaleInfo = () => {
+      const productId = $('#saleProduct').value;
+      const quantity = parseInt($('#saleQuantity').value) || 1;
+      if (!productId) {
+        $('#saleProductInfo').textContent = '请先选择面包';
+        $('#saleTotalAmount').textContent = '¥0.00';
+        return;
+      }
+      const p = db.products.find(x => x.id === productId);
+      if (!p) return;
+      const amount = (p.price * quantity).toFixed(2);
+      $('#saleProductInfo').textContent = `售价：${formatMoney(p.price)} × ${quantity} ${p.unit}，成本：${formatMoney(p.cost)}`;
+      $('#saleTotalAmount').textContent = formatMoney(amount);
+    };
+
+    $('#saleProduct').addEventListener('change', updateSaleInfo);
+    $('#saleQuantity').addEventListener('input', updateSaleInfo);
+
+    // 销售记录 - 日期筛选 & 渲染
+    let currentFilteredSales = []; // 当前筛选后的销售记录
+
+    const renderSalesTable = (fromDate, toDate) => {
+      const tbody = $('#salesTable tbody');
+      let filtered = db.sales;
+
+      if (fromDate && toDate) {
+        filtered = db.sales.filter(s => {
+          return s.date >= fromDate && s.date <= toDate;
+        });
+        $('#salesDateRangeText').textContent = `${fromDate} 至 ${toDate}`;
+      } else {
+        const today = getTodayStr();
+        filtered = db.sales.filter(s => s.date === today);
+        $('#salesDateRangeText').textContent = '今日';
+      }
+
+      currentFilteredSales = filtered; // 保存当前筛选结果，供导出用
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">暂无销售记录</td></tr>';
+        $('#filterRevenue').textContent = '¥0.00';
+        $('#filterCost').textContent = '¥0.00';
+        $('#filterProfit').textContent = '¥0.00';
+        $('#filterMarginRate').textContent = '0%';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(s => {
+        const p = db.products.find(x => x.id === s.productId) || { name: '未知商品', price: 0, cost: 0 };
+        const member = s.memberId ? db.members.find(m => m.id === s.memberId) : null;
+        return `
+          <tr>
+            <td>${new Date(s.createdAt).toLocaleString('zh-CN', {hour12: false})}</td>
+            <td>${p.name}</td>
+            <td>${s.quantity}</td>
+            <td>${formatMoney(p.price)}</td>
+            <td>${formatMoney(p.cost)}</td>
+            <td>${formatMoney(s.amount)}</td>
+            <td>${formatMoney(s.profit)}</td>
+            <td>${member ? `${member.name}(${member.phone})` : '非会员'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // 计算筛选结果统计
+      const revenue = filtered.reduce((sum, s) => sum + s.amount, 0);
+      const cost = filtered.reduce((sum, s) => sum + s.costTotal, 0);
+      const profit = revenue - cost;
+      const marginRate = revenue > 0 ? (profit / revenue * 100).toFixed(1) : 0;
+
+      $('#filterRevenue').textContent = formatMoney(revenue);
+      $('#filterCost').textContent = formatMoney(cost);
+      $('#filterProfit').textContent = formatMoney(profit);
+      $('#filterMarginRate').textContent = `${marginRate}%`;
+    };
+
+    $('#filterSalesBtn').addEventListener('click', () => {
+      const from = $('#saleDateFrom').value;
+      const to = $('#saleDateTo').value;
+      if (!from || !to) return alert('请选择开始日期和结束日期');
+      if (from > to) return alert('开始日期不能晚于结束日期');
+      renderSalesTable(from, to);
+    });
+
+    $('#resetSalesFilterBtn').addEventListener('click', () => {
+      $('#saleDateFrom').value = '';
+      $('#saleDateTo').value = '';
+      renderSalesTable();
+    });
+
+    const addSale = () => {
+      const productId = $('#saleProduct').value;
+      const quantity = parseInt($('#saleQuantity').value) || 1;
+      const memberId = $('#saleMember').value;
+      if (!productId) return alert('请选择面包');
+      const p = db.products.find(x => x.id === productId);
+      if (!p) return alert('商品不存在');
+
+      const amount = (p.price * quantity).toFixed(2);
+      const costTotal = (p.cost * quantity).toFixed(2);
+      const profit = (amount - costTotal).toFixed(2);
+      const now = new Date();
+      const dateStr = getTodayStr();
+
+      db.sales.push({
+        id: genId(),
+        productId,
+        quantity,
+        memberId,
+        amount: Number(amount),
+        costTotal: Number(costTotal),
+        profit: Number(profit),
+        createdAt: now.toISOString(),
+        date: dateStr
+      });
+      saveData('sales');
+
+      // 如果是会员，扣余额
+      if (memberId) {
+        const member = db.members.find(m => m.id === memberId);
+        if (member) {
+          const newBalance = (member.balance || 0) - Number(amount);
+          if (newBalance < 0) {
+            alert('会员余额不足，仍已记录销售，但未扣减余额，请手动调整');
+          } else {
+            member.balance = newBalance;
+            member.transactions = member.transactions || [];
+            member.transactions.push({
+              id: genId(),
+              type: 'consume',
+              amount: Number(amount),
+              balance: newBalance,
+              remark: `购买 ${p.name} × ${quantity}`,
+              createdAt: now.toISOString()
+            });
+            saveData('members');
+          }
+        }
+      }
+
+      renderSalesTable($('#saleDateFrom').value || null, $('#saleDateTo').value || null);
+      renderDashboard();
+      renderMembersSelect();
+      $('#saleQuantity').value = 1;
+      updateSaleInfo();
+    };
+
+    $('#addSaleBtn').addEventListener('click', addSale);
+
+    // 会员管理
+    const renderMembersTable = () => {
+      const tbody = $('#membersTable tbody');
+      if (!db.members.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">暂无会员</td></tr>';
+        return;
+      }
+      tbody.innerHTML = db.members.map(m => `
+        <tr>
+          <td>${m.name}</td>
+          <td>${m.phone}</td>
+          <td>${formatMoney(m.balance || 0)}</td>
+          <td>${new Date(m.createdAt).toLocaleString('zh-CN')}</td>
+          <td>
+            <button class="secondary small-btn" onclick="openMemberDetail('${m.id}')">详情/充值</button>
+          </td>
+        </tr>
+      `).join('');
+    };
+
+    const addMember = () => {
+      const name = $('#memberName').value.trim();
+      const phone = $('#memberPhone').value.trim();
+      if (!name) return alert('请输入姓名');
+      if (!/^\d{11}$/.test(phone)) return alert('请输入11位手机号码');
+      if (db.members.some(m => m.phone === phone)) return alert('该手机号已存在');
+
+      db.members.push({
+        id: genId(),
+        name,
+        phone,
+        createdAt: new Date().toISOString(),
+        balance: 0,
+        transactions: []
+      });
+      saveData('members');
+      renderMembersTable();
+      renderMembersSelect();
+      $('#memberName').value = '';
+      $('#memberPhone').value = '';
+    };
+
+    $('#addMemberBtn').addEventListener('click', addMember);
+
+    let currentMemberId = null; // 当前打开的会员ID，用于导出流水
+
+    window.openMemberDetail = (id) => {
+      const member = db.members.find(m => m.id === id);
+      if (!member) return;
+      currentMemberId = id;
+
+      $('#memberDetailCard').style.display = 'block';
+      $('#memberDetailName').textContent = `${member.name}（手机号：${member.phone}）`;
+      $('#memberBalance').textContent = formatMoney(member.balance || 0);
+
+      // 统计累计充值和消费
+      const rechargeTotal = (member.transactions || []).filter(t => t.type === 'recharge').reduce((sum, t) => sum + t.amount, 0);
+      const consumeTotal = (member.transactions || []).filter(t => t.type === 'consume').reduce((sum, t) => sum + t.amount, 0);
+      $('#memberRechargeTotal').textContent = formatMoney(rechargeTotal);
+      $('#memberConsumeTotal').textContent = formatMoney(consumeTotal);
+
+      // 流水记录
+      const tBody = $('#memberTransactionsTable tbody');
+      if (!member.transactions || !member.transactions.length) {
+        tBody.innerHTML = '<tr><td colspan="5" class="text-center">暂无流水记录</td></tr>';
+      } else {
+        tBody.innerHTML = member.transactions.slice().reverse().map(t => `
+          <tr>
+            <td>${new Date(t.createdAt).toLocaleString('zh-CN')}</td>
+            <td>${t.type === 'recharge' ? '<span class="badge badge-success">充值</span>' : '<span class="badge badge-danger">消费</span>'}</td>
+            <td>${t.type === 'recharge' ? '+' : '-'}${formatMoney(t.amount)}</td>
+            <td>${formatMoney(t.balance)}</td>
+            <td>${t.remark || '-'}</td>
+          </tr>
+        `).join('');
+      }
+
+      // 保存操作
+      $('#saveMemberAction').onclick = () => {
+        const type = $('#memberActionType').value;
+        const amount = parseFloat($('#memberAmount').value) || 0;
+        const remark = $('#memberRemark').value.trim() || (type === 'recharge' ? '充值' : '消费');
+        if (amount <= 0) return alert('金额必须大于0');
+
+        let newBalance = (member.balance || 0);
+        if (type === 'recharge') {
+          // 应用充值活动规则
+          const giveAmount = calcGiveAmount(amount);
+          newBalance += amount + giveAmount;
+          member.transactions.push({
+            id: genId(),
+            type: 'recharge',
+            amount: amount + giveAmount,
+            balance: newBalance,
+            remark: giveAmount > 0 ? `${remark}（充值${amount}，赠送${giveAmount}）` : remark,
+            createdAt: new Date().toISOString()
+          });
+        } else {
+          if (newBalance < amount) return alert('余额不足');
+          newBalance -= amount;
+          member.transactions.push({
+            id: genId(),
+            type: 'consume',
+            amount,
+            balance: newBalance,
+            remark,
+            createdAt: new Date().toISOString()
+          });
+        }
+        member.balance = newBalance;
+        saveData('members');
+        renderMembersTable();
+        renderMembersSelect();
+        openMemberDetail(id); // 刷新详情
+        $('#memberAmount').value = '';
+        $('#memberRemark').value = '';
+      };
+    };
+
+    $('#closeMemberDetail').addEventListener('click', () => {
+      $('#memberDetailCard').style.display = 'none';
+      currentMemberId = null;
+    });
+
+    // 充值活动管理
+    const calcGiveAmount = (amount) => {
+      if (!db.rechargeRules.length) return 0;
+      const rules = [...db.rechargeRules].sort((a, b) => b.minAmount - a.minAmount);
+      for (const r of rules) {
+        if (amount >= r.minAmount) return r.giveAmount;
+      }
+      return 0;
+    };
+
+    const renderRechargeRulesTable = () => {
+      const tbody = $('#rechargeRulesTable tbody');
+      if (!db.rechargeRules.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">暂无充值活动</td></tr>';
+        return;
+      }
+      tbody.innerHTML = db.rechargeRules.map((r, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${formatMoney(r.minAmount)}</td>
+          <td>${formatMoney(r.giveAmount)}</td>
+          <td>${r.desc || '-'}</td>
+          <td>
+            <button class="secondary small-btn" onclick="deleteRechargeRule('${r.id}')">删除</button>
+          </td>
+        </tr>
+      `).join('');
+    };
+
+    const addRechargeRule = () => {
+      const minAmount = parseFloat($('#rechargeMin').value) || 0;
+      const giveAmount = parseFloat($('#rechargeGive').value) || 0;
+      const desc = $('#rechargeDesc').value.trim();
+      if (minAmount <= 0) return alert('充值门槛必须大于0');
+      if (giveAmount < 0) return alert('赠送金额不能为负数');
+
+      db.rechargeRules.push({
+        id: genId(),
+        minAmount,
+        giveAmount,
+        desc,
+        createdAt: new Date().toISOString()
+      });
+      saveData('rechargeRules');
+      renderRechargeRulesTable();
+      $('#rechargeMin').value = '';
+      $('#rechargeGive').value = '';
+      $('#rechargeDesc').value = '';
+    };
+
+    window.deleteRechargeRule = (id) => {
+      if (!confirm('确定删除该充值规则吗？')) return;
+      db.rechargeRules = db.rechargeRules.filter(r => r.id !== id);
+      saveData('rechargeRules');
+      renderRechargeRulesTable();
+    };
+
+    $('#addRechargeRuleBtn').addEventListener('click', addRechargeRule);
+
+    // 概览页
+    const renderDashboard = () => {
+      const today = getTodayStr();
+      const todaySales = db.sales.filter(s => s.date === today);
+      const revenue = todaySales.reduce((sum, s) => sum + s.amount, 0);
+      const costTotal = todaySales.reduce((sum, s) => sum + s.costTotal, 0);
+      const profit = revenue - costTotal;
+      const marginRate = revenue > 0 ? (profit / revenue * 100).toFixed(1) : 0;
+
+      $('#todayRevenue').textContent = formatMoney(revenue);
+      $('#todayProfit').textContent = formatMoney(profit);
+      $('#todayMarginRate').textContent = `${marginRate}%`;
+      $('#todaySalesCount').textContent = todaySales.length;
+
+      $('#memberCount').textContent = db.members.length;
+      const memberBalanceTotal = db.members.reduce((sum, m) => sum + (m.balance || 0), 0);
+      $('#memberBalanceTotal').textContent = formatMoney(memberBalanceTotal);
+
+      // 今日热销面包
+      const productMap = {};
+      todaySales.forEach(s => {
+        if (!productMap[s.productId]) {
+          productMap[s.productId] = {
+            name: db.products.find(p => p.id === s.productId)?.name || '未知',
+            quantity: 0,
+            amount: 0,
+            costTotal: 0,
+            profit: 0
+          };
+        }
+        productMap[s.productId].quantity += s.quantity;
+        productMap[s.productId].amount += s.amount;
+        productMap[s.productId].costTotal += s.costTotal;
+        productMap[s.productId].profit += s.profit;
+      });
+      const topProducts = Object.values(productMap).sort((a, b) => b.amount - a.amount);
+      const tbody = $('#topProductsTable tbody');
+      if (!topProducts.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">暂无数据</td></tr>';
+        return;
+      }
+      tbody.innerHTML = topProducts.map(p => {
+        const rate = p.amount > 0 ? ((p.profit / p.amount) * 100).toFixed(1) : 0;
+        return `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.quantity}</td>
+            <td>${formatMoney(p.amount)}</td>
+            <td>${formatMoney(p.profit)}</td>
+            <td>${rate}%</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    // ================= Excel 导出相关 =================
+
+    // 通用：把数组转成 worksheet 并下载
+    const exportToExcel = (data, sheetName, fileName) => {
+      if (!data || !data.length) return alert('暂无数据可导出');
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      XLSX.writeFile(wb, fileName || `${sheetName}_${new Date().toLocaleString().replace(/[^\d]/g, '')}.xlsx`);
+    };
+
+    // 1. 商品列表导出
+    $('#exportProductsExcel').addEventListener('click', () => {
+      const data = db.products.map(p => ({
+        商品名称: p.name,
+        单位: p.unit,
+        售价: p.price,
+        成本: p.cost,
+        毛利: (p.price - p.cost).toFixed(2),
+        毛利率: p.cost > 0 ? `${((p.price - p.cost) / p.price * 100).toFixed(2)}%` : '100%',
+        创建时间: new Date(p.createdAt).toLocaleString()
+      }));
+      exportToExcel(data, '商品列表', '面包商品列表.xlsx');
+    });
+
+    // 2. 销售记录导出（当前筛选结果）
+    $('#exportSalesExcel').addEventListener('click', () => {
+      if (!currentFilteredSales.length) return alert('当前筛选条件下暂无销售数据可导出');
+      const data = currentFilteredSales.map(s => {
+        const p = db.products.find(x => x.id === s.productId) || { name: '未知商品', price: 0, cost: 0 };
+        const member = s.memberId ? db.members.find(m => m.id === s.memberId) : null;
+        return {
+          销售时间: new Date(s.createdAt).toLocaleString(),
+          商品名称: p.name,
+          数量: s.quantity,
+          单价: p.price,
+          成本单价: p.cost,
+          销售额: s.amount,
+          成本合计: s.costTotal,
+          利润: s.profit,
+          会员姓名: member?.name || '非会员',
+          会员手机: member?.phone || '',
+          销售日期: s.date
+        };
+      });
+      const rangeText = $('#salesDateRangeText').textContent;
+      exportTo
